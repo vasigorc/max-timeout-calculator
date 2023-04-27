@@ -8,32 +8,21 @@ pub struct MaxTimeoutCalculator {
 }
 
 impl MaxTimeoutCalculator {
-    fn tail_optimized(
-        current_max_backoff: Duration,
-        current_sum: Duration,
-        factor: f64,
-        limit: Duration,
-    ) -> Duration {
-        if current_sum >= limit {
+    fn tail_optimized(&self, current_max_backoff: Duration, current_sum: Duration) -> Duration {
+        if current_sum >= self.capped_total_wait {
             current_max_backoff
         } else {
-            let new_current_max_backoff = current_max_backoff.mul_f64(factor);
+            let new_current_max_backoff = current_max_backoff.mul_f64(self.random_factor);
             Self::tail_optimized(
+                &self,
                 new_current_max_backoff,
                 Duration::from_secs(current_sum.as_secs() + new_current_max_backoff.as_secs()),
-                factor,
-                limit,
             )
         }
     }
 
     pub fn calculate_max_backoff(&self) -> Result<Duration, String> {
-        let result = Self::tail_optimized(
-            self.min_backoff,
-            self.min_backoff,
-            self.random_factor,
-            self.capped_total_wait,
-        );
+        let result = Self::tail_optimized(&self, self.min_backoff, self.min_backoff);
         return Ok(result);
     }
 

@@ -4,7 +4,7 @@ Simple calculator to figure out what should be a maximum backoff for a restart /
 
 To run it simply run:
 
-```rust
+```shell
 cargo run
 ```
 
